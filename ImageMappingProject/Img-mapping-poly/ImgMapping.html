@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>polygon mapping</title>
+	<style>
+		canvas {
+			width: 300px;
+			height: 200px;
+			display: inline !important;
+			border: 3px solid rgb(165, 3, 3);
+  			cursor: crosshair;
+			position: absolute;
+			right: 75px;
+		}
+
+		#imgMap area:hover #poly-0,
+		#imgMap  area:active #poly-0 {
+			fill: blue;
+		}
+
+		#done {
+			display: block;
+		}
+
+		*/ img {
+			vertical-align: unset !important;
+		}
+	</style>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha512-bnIvzh6FU75ZKxp0GXLH9bewza/OIw6dLVh9ICg0gogclmYGguQJWl8U30WpbsGTqbIiAwxTsbe76DErLq5EDQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/core.js" integrity="sha512-LlRCR6OyAE70S18n3N8ZtwUsUBd15z/LQxpTH+AW5nh8oZkKG9MD+KmutQUqx3Zx7iVALuGdHZk8r4GQ4ZBVlw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.1/jquery.js" integrity="sha512-sJa5KWq3F99QOeijUOm9O+BgDgVtzrWBBagZtjlW7F3I47NO1OaNJvbut+9KOPmjNr4Wb3blU4vQiQdi+Zk6wg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"
+		integrity="sha512-kp7YHLxuJDJcOzStgd6vtpxr4ZU9kjn77e6dBsivSz+pUuAuMlE2UTdKB7jjsWT84qbS8kdCWHPETnP/ctrFsA=="
+		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js"
+		integrity="sha512-pBSlhNUvB+td6sjW1zmR6L7c7kVWR4octUPl4tfHmzO63424nxta8aLmficEcAAswQmRqTiToi63AazDurj/Sg=="
+		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+			
+	<script type="text/javascript" src="../jquery.imagemapster.js"></script>
+	<link rel="stylesheet" href="../imagemapster.css" />
+
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/imagemapster/1.5.4/jquery.imagemapster.js" integrity="sha512-cpMx2tMC8g9QilwXFVFqVT5TWkvfq/xEaOspfF1FUUUJy5mL6As50+uh3yOoVlu1bKwsJrUthuEzC1m6WquRKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+
+	
+
+
+
+</head>
+
+<body>
+	<div class="container" style="margin-top: 5px;">
+		<div class="row">
+			<div class="col-sm-2" style="text-align: center;">
+				<label> Name:</label>
+				<input type="text" id="txtName" class="form-control"><br>
+				<label> Description:</label>
+				<input type="text" id="txtDesc" class="form-control"><br>
+				<input type="button" value="submit" onclick="postMappingData()" style="margin-bottom: 5px;"
+					class="btn btn-primary">
+				<br>
+				<input type="button" id="btnShowMappingData" value="Show" onclick="showImage()" class="btn btn-warning">
+
+			</div>
+			<div class="col-sm-4">
+				<div id="demo">
+					<img width="300" height="200" src="../Img-mapping/images/beatles_basic.jpg" id="screenshot"
+						draggable="false" usemap="#imgMapped">
+
+					<canvas></canvas>
+					<button id="done" class="btn btn-primary">done</button>
+				</div>
+			</div>
+			<div class="col-sm-4" id="duplicateImg">
+				<map name="imgMapped" id="imgMap">
+					<!-- <area shape="poly" id="poly-0" alt="poly-0" title="poly-1" href="" coords="29,93,83,93,90,36,31,35"> -->
+				</map>
+			</div>
+			<div class="col-sm-2">
+				<label id="nameMapping"></label>
+			</div>
+		</div>
+	</div>
+
+</body>
+
+</html>
+<script>
+	var canvas = document.querySelector("canvas");
+	var doneBtn = document.querySelector("#done");
+	canvas.width = canvas.offsetWidth;
+	canvas.height = canvas.offsetHeight;
+	var canvasLeft = canvas.getBoundingClientRect().left;
+	var canvasRight = canvas.getBoundingClientRect().top;
+	var ctx = canvas.getContext("2d");
+	var clickPoints = [];
+	var workplaces = [];
+	const coordinates = [];
+
+	drawing = false;
+
+	canvas.addEventListener("click", e => {
+		drawing = true;
+		var mouseX = e.clientX - canvasLeft;
+		var mouseY = e.clientY - canvasRight;
+		clickPoints.push({
+			x: mouseX,
+			y: mouseY
+		});
+		console.log(clickPoints);
+		drawDot(mouseX, mouseY);
+	});
+
+	function postMappingData() {
+		let myObj =
+		{
+			name: document.getElementById("txtName").value,
+			Desc: document.getElementById("txtDesc").value
+		};
+		//let myObj_serialized  = JSON.stringify(myObj);
+		if (localStorage.getItem('PolyMappingData') == null) {
+			localStorage.setItem('PolyMappingData', '[]');
+		}
+		var old_data = JSON.parse(localStorage.getItem('PolyMappingData'));
+		old_data.push(myObj);
+		window.localStorage.setItem('PolyMappingData', JSON.stringify(old_data));
+		document.getElementById("txtName").value = '';
+		document.getElementById("txtDesc").value = '';
+	}
+
+	let myObj =
+	{
+		xCord: [],
+		yCord: []
+	};
+	function showImage() {
+		const node = document.getElementById("screenshot");
+		const clone = node.cloneNode(true);
+		let temp = document.body.appendChild(clone);
+		document.getElementById("duplicateImg").append(temp);
+
+		var getCoordinate = localStorage.getItem("PolyCoordinates");
+		var getCord = JSON.parse(getCoordinate);
+
+
+		for (var i = 0; i < getCord.length; i++) {
+			var item = getCord[i];
+			var areaTag = document.createElement('area');
+			areaTag.shape = 'poly';
+			areaTag.id = 'poly-' + i;
+			areaTag.alt = 'poly-' + i;
+			areaTag.title = 'poly-' + (i + 1);
+			areaTag.href = '';
+			areaTag.onblur = 'this.focus()';
+			var imgMapRec = [];
+			var a = [];
+			var b = [];
+			var c = [];
+			for (let j = 0; j < item.points.length; j++) {
+				a = item.points[j].x + ' ' + item.points[j].y;
+				imgMapRec.push(a);
+
+			}
+			areaTag.setAttribute("coords", imgMapRec);
+			areaTag.onclick = function (e) {
+				e.preventDefault();
+			}
+			document.getElementById('imgMap').appendChild(areaTag);
+			//document.getElementById('poly' + i).setAttribute("coodrs", a);
+		}
+		for (var i = 0; i < getCord.length; i++) {
+			document.getElementById('poly-' + i).setAttribute('onmouseover', 'showMappingDtls(this)');
+			document.getElementById('poly-' + i).setAttribute('onmouseout', 'hideMappingDtls(this)');
+		}
+	}
+	function showMappingDtls(x) {
+		// var coords = x.coords;
+		var x = x.id;
+		var getmappingData = localStorage.getItem("PolyMappingData");
+		var getData = JSON.parse(getmappingData);
+
+		for (let i = 0; i < getData.length; i++) {
+			var element = getData[i];
+			if (x == 'poly-' + i) {
+				document.getElementById('poly-' + i).style.display = 'block';
+				document.getElementById('nameMapping').style.display = 'block';
+				document.getElementById("nameMapping").innerHTML = 'Name:' + '<h5 style="display:inline;">' + element.name + '</h4>' + '<br>' + 'Description :' + '<h5 style="display:inline;">' + element.Desc + '</h5>';
+			}
+			var image = document.getElementById('poly-0');
+			
+		}
+	}
+	function hideMappingDtls() {
+		var getmappingData = localStorage.getItem("PolyMappingData");
+		var getData = JSON.parse(getmappingData);
+		for (let i = 0; i < getData.length; i++) {
+			document.getElementById('nameMapping').style.display = 'none';
+		}
+	}
+
+	doneBtn.addEventListener('click', () => {
+		drawing = false;
+		workplaces.push({
+			points: clickPoints
+		});
+		console.log(workplaces);
+		clickPoints = [];
+		renderWorkplaces();
+	});
+
+	const drawPoly = points => {
+		ctx.lineWidth = 2
+		ctx.beginPath();
+		ctx.moveTo(points[0].x, points[0].y);
+		points.reverse().forEach(point => {
+			ctx.lineTo(point.x, point.y);
+		});
+		ctx.stroke();
+	}
+
+	const renderWorkplaces = () => {
+		ctx.clearRect(0, 0, canvas.width, canvas.height)
+		workplaces.forEach(workplace => {
+			if (workplace.points.length > 2) {
+				drawPoly(workplace.points);
+			}
+			var temp3 = Array.prototype.concat.apply(workplaces);
+			coordinates.push(workplaces); //adding coordinates to local storage
+			window.localStorage.setItem('PolyCoordinates', JSON.stringify(workplaces))
+		});
+	}
+
+	const drawDot = (x, y) => {
+		ctx.beginPath()
+		ctx.arc(x, y, 4, 0, 2 * Math.PI);
+		ctx.lineWidth = 4;
+		ctx.strokeStyle = 'orange';
+		ctx.stroke();
+		ctx.fill();
+	}
+
+	renderWorkplaces();
+</script>
